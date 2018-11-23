@@ -1,5 +1,8 @@
+#!/usr/bin/env python3
+import time
+from ev3dev2.motor import LargeMotor, OUTPUT_A, OUTPUT_B, SpeedPercent, MoveTank
+
 # line_follower.py
-# by: Carl Strömberg
 
 # Import the EV3-robot library
 import ev3dev.ev3 as ev3
@@ -25,7 +28,7 @@ class LineFollower:
         # motors
         lm = ev3.LargeMotor('outB');  assert lm.connected  # left motor
         rm = ev3.LargeMotor('outC');  assert rm.connected  # right motor
-        mm = ev3.MediumMotor('outD'); assert mm.connected  # medium motor
+        mm = ev3.MediumMotor('outD'); #assert mm.connected  # medium motor
 
         speed = 360/4  # deg/sec, [-1000, 1000]
         dt = 500       # milliseconds
@@ -48,9 +51,9 @@ class LineFollower:
             # deal with obstacles
             distance = us.value() // 10  # convert mm to cm
 
-            if distance <= 5:  # sweep away the obstacle
-                mm.run_timed(time_sp=600, speed_sp=+150, stop_action="hold").wait()
-                mm.run_timed(time_sp=600, speed_sp=-150, stop_action="hold").wait()
+            # if distance <= 5:  # sweep away the obstacle
+            #     mm.run_timed(time_sp=600, speed_sp=+150, stop_action="hold").wait()
+            #     mm.run_timed(time_sp=600, speed_sp=-150, stop_action="hold").wait()
 
             # Calculate steering using PID algorithm
             error = target_value - cs.value()
