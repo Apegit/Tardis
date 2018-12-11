@@ -20,8 +20,6 @@ lcolor2 = LightSensor(INPUT_3)
 #ccolor = ColorSensor(INPUT_1)
 mr = LargeMotor(OUTPUT_A)
 ml = LargeMotor(OUTPUT_B)
-switch1 = True
-switch2 = True
 a = .175
 def kalibrierung(a, l1, l2):
     return (l2 - l1) * a
@@ -29,35 +27,52 @@ def kalibrierung(a, l1, l2):
 d = kalibrierung(a, lcolor1.reflected_light_intensity, lcolor2.reflected_light_intensity) 
 
 def firstwhile():
-    global switch1, switch2
+    global switch1, switch2 
     lcolor1 = LightSensor(INPUT_2)
     lcolor2 = LightSensor(INPUT_3)
-    Kp = 110
+    Kp = 140
     Ki = 0
     Kd = 0
     offset = d
-    Tp = 30
+    Tp = 50
     integral = 0
     lastError = 0
     dervitave = 0
-    while(switch1):
-        if((lcolor2.reflected_light_intensity - lcolor1.reflected_light_intensity) > d ):
-            switch1 = False
-            switch2 = True     
-        lightvalue1 = lcolor2.reflected_light_intensity
-        error = lightvalue1 - offset
-        integral = integral + error
-        dervitave = error - lastError
-        turn = Kp * error + Ki * integral + Kd * dervitave
-        turn = turn / 100
-        powerA = Tp - turn
+    while(True):
+        while((lcolor2.reflected_light_intensity - lcolor1.reflected_light_intensity) < d ):
+            error = lcolor1.reflected_light_intensity - offset
+            integral = integral + error
+            dervitave = error - lastError
+            turn = Kp * error + Ki * integral + Kd * dervitave
+            turn = turn / 100
+            powerA = Tp - turn
+            powerC = Tp + turn
+            ml.on(SpeedPercent(powerA))
+            mr.on(SpeedPercent(powerC))
+            lastError = error
+
+        while((lcolor2.reflected_light_intensity - lcolor1.reflected_light_intensity) > d ):
+            error = lcolor2.reflected_light_intensity - offset
+            integral = integral + error
+            dervitave = error - lastError
+            turn = Kp * error + Ki * integral + Kd * dervitave
+            turn = turn / 100
+            powerA = Tp + turn
+            powerC = Tp - turn
+            ml.on(SpeedPercent(powerA))
+            mr.on(SpeedPercent(powerC))
+            lastError = error
+
+        powerA = Tp + turn
         powerC = Tp + turn
         ml.on(SpeedPercent(powerA))
         mr.on(SpeedPercent(powerC))
         lastError = error
 
+       
 
-def secwhile():
+
+#def secwhile():
     global switch1, switch2
     lcolor1 = LightSensor(INPUT_2)
     lcolor2 = LightSensor(INPUT_3)
@@ -81,6 +96,7 @@ def secwhile():
         turn = turn / 100
         powerA = Tp + turn
         powerC = Tp - turn
+        last_step = 'LTR'
         ml.on(SpeedPercent(powerA))
         mr.on(SpeedPercent(powerC))
         lastError = error
@@ -114,10 +130,9 @@ def secwhile():
 #             ml.on(SpeedPercent(powerA))
 #             mr.on(SpeedPercent(powerB))
 
-# thirdwhile()
-while(True):
-    firstwhile()
-    secwhile()
+firstwhile()
+
+    
 
 
 
