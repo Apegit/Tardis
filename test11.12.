@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+
+import time
+from ev3dev2.motor import LargeMotor, OUTPUT_A, OUTPUT_B, SpeedPercent, MoveTank
+from ev3dev2.sensor import INPUT_1, INPUT_2, INPUT_3
+from ev3dev2.sensor.lego import TouchSensor
+from ev3dev2.led import Leds
+from ev3dev2.sensor.lego import ColorSensor, LightSensor
+
+'''Kp = 520
+Ki = 0
+Kd = 0
+offset = 20
+Tp = 30
+integral = 0
+lastError = 0
+dervitave = 0'''
+lcolor1 = LightSensor(INPUT_2)
+lcolor2 = LightSensor(INPUT_3)
+ccolor = ColorSensor(INPUT_1)
+mr = LargeMotor(OUTPUT_A)
+ml = LargeMotor(OUTPUT_B)
+switch1 = True
+switch2 = True
+a = .175
+def kalibrierung(a, l1, l2):
+    return (l2 - l1) * a
+
+d = kalibrierung(a, lcolor1.reflected_light_intensity, lcolor2.reflected_light_intensity) 
+
+global switch1, switch2
+lcolor1 = LightSensor(INPUT_2)
+lcolor2 = LightSensor(INPUT_3)
+Kp = 110
+Ki = 0
+Kd = 0
+offset = d
+Tp = 30
+integral = 0
+lastError = 0
+dervitave = 0
+direction = ""
+while(True):
+   error = lightvalue1 - offset
+    integral = integral + error
+    dervitave = error - lastError
+    turn = Kp * error + Ki * integral + Kd * dervitave
+    turn = turn / 100
+    if((lcolor2.reflected_light_intensity - lcolor1.reflected_light_intensity) > d + 1):
+        powerA = Tp - turn
+        powerC = Tp + turn
+        ml.on(SpeedPercent(powerA))
+        mr.on(SpeedPercent(powerC))
+        lastError = error
+        direction = "right"
+    elif((lcolor1.reflected_light_intensity - lcolor2.reflected_light_intensity) > d + 1):
+        powerA = Tp + turn
+        powerC = Tp - turn
+        ml.on(SpeedPercent(powerA))
+        mr.on(SpeedPercent(powerC))
+        lastError = error
+        direction = "left"
+    else:
+        powerA = Tp
+        powerC = Tp
+        ml.on(SpeedPercent(powerA))
+        mr.on(SpeedPercent(powerC))
+        if(ccolor.color == 1 or ccolor.color == 2):
+            if(direction == "left"):
+                while(lcolor2.reflected_light_intensity - lcolor1.reflected_light_intensity) < d + 1 and lcolor2.reflected_light_intensity - lcolor1.reflected_light_intensity) < d + 1):
+                    ml.on(SpeedPercent(30))
+            else:
+                while(lcolor2.reflected_light_intensity - lcolor1.reflected_light_intensity) < d + 1 and lcolor2.reflected_light_intensity - lcolor1.reflected_light_intensity) < d + 1):
+                    mr.on(SpeedPercent(30))
