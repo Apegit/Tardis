@@ -21,20 +21,26 @@ mr = LargeMotor(OUTPUT_A)
 ml = LargeMotor(OUTPUT_B)
 switch1 = True
 switch2 = True
+a = 3
+def kalibrierung(a, l1, l2):
+    return (l2 - l1) * a
+
+d = kalibrierung(a, lcolor1.reflected_light_intensity, lcolor2.reflected_light_intensity)
+
 def firstwhile():
+    global switch1, switch2
     lcolor1 = LightSensor(INPUT_2)
     lcolor2 = LightSensor(INPUT_3)
-    Kp = 138
+    Kp = 85
     Ki = 0
     Kd = 0
-    offset = 27
+    offset = d
     Tp = 30
     integral = 0
     lastError = 0
     dervitave = 0
     while(switch1):
-        global switch1, switch2
-        if(lcolor1.reflected_light_intensity > 47 and lcolor2.reflected_light_intensity < 23):
+        if((lcolor2.reflected_light_intensity - lcolor1.reflected_light_intensity) > d):
             switch1 = False
             switch2 = True
         lightvalue1 = lcolor1.reflected_light_intensity
@@ -48,26 +54,22 @@ def firstwhile():
         ml.on(SpeedPercent(powerA))
         mr.on(SpeedPercent(powerC))
         lastError = error
-        if(lcolor1.reflected_light_intensity > 47 and lcolor2.reflected_light_intensity < 23):
-            switch1 = False
-            switch2 = True
-    #while 20 > lightvalue2 > 15 and error > 4.6:
-        #ml.on(SpeedPercent(30))
-        #mr.on(SpeedPercent(30))
+
+
 def secwhile():
+    global switch1, switch2
     lcolor1 = LightSensor(INPUT_2)
     lcolor2 = LightSensor(INPUT_3)
-    Kp = 250
+    Kp = 85
     Ki = 0
     Kd = 0
-    offset = 23.5
-    Tp = 30
+    offset = d
+    Tp = 50
     integral = 0
     lastError = 0
     dervitave = 0
     while(switch2):
-        global switch2, switch1
-        if(lcolor1.reflected_light_intensity < 47 and lcolor2.reflected_light_intensity < 23):
+        if((lcolor1.reflected_light_intensity - lcolor2.reflected_light_intensity) > d):
             switch1 = True
             switch2 = False
         lightvalue2 = lcolor2.reflected_light_intensity
@@ -76,14 +78,13 @@ def secwhile():
         dervitave = error - lastError
         turn = Kp * error + Ki * integral + Kd * dervitave
         turn = turn / 100
-        powerA = Tp + turn
-        powerC = Tp - turn
+        powerA = Tp - turn
+        powerC = Tp + turn
         ml.on(SpeedPercent(powerA))
         mr.on(SpeedPercent(powerC))
         lastError = error
-        if(lcolor1.reflected_light_intensity < 47 and lcolor2.reflected_light_intensity > 23):
-            switch1 = True
-            switch2 = False
+
+
 while(True):
     firstwhile()
     secwhile()
